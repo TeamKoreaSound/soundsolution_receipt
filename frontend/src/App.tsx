@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { ChangeEvent } from 'react';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+import { LogoutButton } from './AuthGate';
 import {
   Image as ImageIcon,
   LayoutDashboard,
@@ -1275,8 +1276,7 @@ function App() {
           </h1>
           
           <div className="flex-row">
-            {/* API Key Input has been removed from UI for security/cleanliness. 
-                Configure it via .env file (VITE_GEMINI_API_KEY) */}
+            <LogoutButton />
           </div>
         </header>
 
