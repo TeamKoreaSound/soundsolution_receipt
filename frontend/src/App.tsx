@@ -507,6 +507,30 @@ function App() {
     }
   };
 
+  // 인쇄/PDF 저장 시 document.title을 일시 변경하여 기본 파일명 자동 설정
+  const handlePrint = () => {
+    const originalTitle = document.title;
+    let name = '';
+    if (activeTab === 'evidence') {
+      const periodTag = workflowMode === 'lunch' ? (settlementMonth || docDate) : docDate;
+      name = `${WORKFLOW_LABELS[workflowMode]}_증빙철_${periodTag}`;
+    } else if (activeTab === 'preview') {
+      if (workflowMode === 'lunch') {
+        name = `점심식대지출증빙_${settlementMonth || docDate}`;
+      } else {
+        name = `법인카드지출증빙_${docDate}`;
+      }
+    } else {
+      name = `${WORKFLOW_LABELS[workflowMode]}_${docDate}`;
+    }
+    document.title = name;
+    // 브라우저가 title을 읽을 시간을 줌
+    setTimeout(() => {
+      window.print();
+      setTimeout(() => { document.title = originalTitle; }, 500);
+    }, 50);
+  };
+
   // 현금 내역 수동 추가 (법인카드 모드 전용)
   const addCashReceipt = () => {
     const today = new Date().toISOString().split('T')[0];
@@ -811,7 +835,7 @@ function App() {
     return (
       <div className="preview-container flex-col" style={{ alignItems: 'center' }}>
         <div className="flex-row" style={{ width: '850px', justifyContent: 'flex-end', marginBottom: '16px' }}>
-          <button className="btn-primary" onClick={() => window.print()}>
+          <button className="btn-primary" onClick={handlePrint}>
             <FileText size={18} />
             현재 화면 PDF/A4 인쇄
           </button>
@@ -992,7 +1016,7 @@ function App() {
     return (
       <div className="preview-container flex-col" style={{ alignItems: 'center' }}>
         <div className="flex-row" style={{ width: '850px', justifyContent: 'flex-end', marginBottom: '16px' }}>
-          <button className="btn-primary" onClick={() => window.print()}>
+          <button className="btn-primary" onClick={handlePrint}>
             <FileText size={18} />
             현재 화면 PDF/A4 인쇄
           </button>
@@ -1133,7 +1157,7 @@ function App() {
     return (
       <div className="preview-container flex-col" style={{ alignItems: 'center' }}>
         <div className="flex-row" style={{ width: '850px', justifyContent: 'flex-end', marginBottom: '16px' }}>
-          <button className="btn-primary" onClick={() => window.print()}>
+          <button className="btn-primary" onClick={handlePrint}>
             <ImageIcon size={18} />
             현재 화면 PDF/A4 인쇄
           </button>
