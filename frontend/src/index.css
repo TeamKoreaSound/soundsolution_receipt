@@ -231,9 +231,10 @@ input:focus, select:focus, textarea:focus {
 
 @media print {
   @page {
-    margin: 0; /* 브라우저 기본 날짜/URL 등 머리글바닥글 영역 제거 */
+    size: A4;
+    margin: 10mm 10mm 12mm 10mm; /* 프린터 인쇄 불가능 영역 보정 */
   }
-  body {
+  html, body {
     background: white;
     color: black;
     margin: 0;
@@ -261,11 +262,20 @@ input:focus, select:focus, textarea:focus {
   }
   .preview-paper {
     width: 100%;
-    min-height: 100%;
+    min-height: 0;
     margin: 0;
     padding: 0;
     box-shadow: none;
     border-radius: 0;
+  }
+  /* 지출결의서: 페이지별 테이블이 페이지 경계를 넘어가지 않도록 */
+  .page-break {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .page-break > table {
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
   /* 증빙철: 카드가 페이지 경계를 가로지르지 않도록 */
   .evidence-section > div > div {
