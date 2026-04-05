@@ -267,6 +267,11 @@ input:focus, select:focus, textarea:focus {
     box-shadow: none;
     border-radius: 0;
   }
+  /* 증빙철: 카드가 페이지 경계를 가로지르지 않도록 */
+  .evidence-section > div > div {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
   /* Optional to force background colors in Chrome Print */
   * {
     -webkit-print-color-adjust: exact !important;

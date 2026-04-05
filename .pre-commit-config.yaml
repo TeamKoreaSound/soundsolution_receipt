@@ -1,0 +1,16 @@
+repos:
+  - repo: local
+    hooks:
+      - id: lint-frontend-size
+        name: Check frontend component sizes
+        entry: python3 tools/lint_frontend.py
+        language: system
+        pass_filenames: false
+        files: ^frontend/src/.*\.(tsx|ts)$
+
+      - id: lint-docs
+        name: Check documentation freshness
+        entry: python3 tools/lint_docs.py
+        language: system
+        pass_filenames: false
+        files: .*\.md$

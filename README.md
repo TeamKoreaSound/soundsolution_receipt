@@ -1,73 +1,57 @@
-# React + TypeScript + Vite
+# 영수증 정리 (Receipt Hub)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+영수증 이미지를 Gemini API로 OCR 분석하여 **지출결의서(.xlsx)**와
+**영수증 증빙철(A4 인쇄)**을 자동 생성하는 React SPA.
 
-Currently, two official plugins are available:
+## 빠른 시작
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+```bash
+cd frontend
+npm install
 
-## React Compiler
+# .env 파일 생성 (루트 또는 frontend/)
+echo "VITE_GEMINI_API_KEY=your_key_here" > .env
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+npm run dev           # http://localhost:5173
+npm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 주요 기능
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- 영수증 사진 드래그·드롭 업로드 → Gemini 2.5 Flash OCR
+- 지출결의서 템플릿 자동 채움 (13건 단위 시트 분할)
+- A4 인쇄용 증빙철 레이아웃
+- localStorage 기반 작업 상태 유지 + 백업/복원 (확장자 .exp)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 프로젝트 구조
+
 ```
+├── AGENTS.md / CLAUDE.md / GEMINI.md   ← AI 에이전트 진입점
+├── ARCHITECTURE.md                      ← 시스템 구조
+├── QUALITY_SCORE.md                     ← 품질 등급 추적
+├── frontend/                            ← React + Vite SPA
+├── tools/                               ← 커스텀 린터
+├── docs/                                ← 설계 문서
+├── directives/                          ← 에이전트 지시 파일
+└── scripts/                             ← PDF/XLS 분석 스크립트
+```
+
+자세한 내용은 [AGENTS.md](AGENTS.md)와 [ARCHITECTURE.md](ARCHITECTURE.md) 참조.
+
+## Quality Gate
+
+```bash
+# 프론트엔드
+cd frontend && npx tsc --noEmit && npx eslint src/ && npm run build
+
+# 문서/구조
+python3 tools/lint_frontend.py
+python3 tools/lint_docs.py
+```
+
+## 기술 스택
+
+- React 19, TypeScript, Vite 8
+- `xlsx` (SheetJS) — Excel 템플릿 조작
+- `@google/generative-ai` — Gemini OCR
+- `lucide-react` — 아이콘

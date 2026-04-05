@@ -11,6 +11,8 @@ node_modules
 dist
 dist-ssr
 *.local
+.env
+.env.local
 
 # Editor directories and files
 .vscode/*
@@ -22,3 +24,18 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Ad-hoc dev dumps
+pdf_out*.txt
+excel_dump*.txt
+pdf_thumb.png
+
+# Vite cache
+.vite/
+frontend/.vite/
+
+# Root-level screenshots / reference PDFs (dev-only, not part of app)
+/*.png
+/*.pdf
+!/docs/**/*.pdf
+!/docs/**/*.png
