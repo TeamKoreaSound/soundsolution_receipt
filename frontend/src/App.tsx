@@ -892,7 +892,7 @@ function App() {
                         <td style={{textAlign: 'left', paddingLeft: '24px'}}>{docDate || '2026-04-04'}</td>
                         <td rowSpan={3} style={{background: '#d9d9d9', writingMode: 'vertical-rl', letterSpacing: '10px', fontWeight: 'bold'}}>결 재</td>
                         <td style={{background: '#d9d9d9', fontWeight: 'bold'}}>담 당</td>
-                        <td style={{background: '#d9d9d9', fontWeight: 'bold'}}>차장/부장</td>
+                        <td style={{background: '#d9d9d9', fontWeight: 'bold'}}>부장/이사</td>
                         <td style={{background: '#d9d9d9', fontWeight: 'bold'}}>전무/부사장</td>
                         <td style={{background: '#d9d9d9', fontWeight: 'bold'}}>총 무</td>
                         <td style={{background: '#d9d9d9', fontWeight: 'bold'}}>대표이사</td>
