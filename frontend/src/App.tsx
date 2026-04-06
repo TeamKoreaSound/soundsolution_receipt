@@ -1207,6 +1207,7 @@ function App() {
                   <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}><span style={{fontWeight:'bold', color:'#000'}}>카드 번호 :</span> {r.cardNumber || ''}</div>
                   <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}><span style={{fontWeight:'bold', color:'#000'}}>승인번호 :</span> {r.approvalNum || ''}</div>
                   <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}><span style={{fontWeight:'bold', color:'#000'}}>가맹점 번호 :</span> {r.merchantNum || ''}</div>
+                  {r.category && <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}><span style={{fontWeight:'bold', color:'#000'}}>사용 내역 :</span> {r.category}</div>}
                   <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: '8px', color:'#000', fontSize: '13px', textAlign: 'right' }}>
                     <span style={{fontWeight:'bold'}}>승인 금액 :</span> {r.amount.toLocaleString()} 원
                   </div>
