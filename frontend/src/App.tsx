@@ -258,8 +258,6 @@ function App() {
     return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
   });
 
-  const quotaAlertShownRef = useRef(false);
-  const prevImageCountRef = useRef(0);
   // 저장된 상태가 현재 workflowMode의 데이터임을 추적 (모드 전환 중 오염 방지)
   const committedModeRef = useRef<WorkflowMode>(workflowMode);
 
@@ -267,25 +265,10 @@ function App() {
     // 모드 전환 직후, 아직 상태가 새 모드의 데이터로 재로드되지 않았으면 저장 스킵
     if (committedModeRef.current !== workflowMode) return;
 
-    const currentImageCount = receipts.filter(r => r.imageUrl).length;
-    const imagesIncreased = currentImageCount > prevImageCountRef.current;
-    prevImageCountRef.current = currentImageCount;
-
     try {
       localStorage.setItem(k('receipts'), JSON.stringify(receipts));
     } catch {
-      console.warn('localStorage quota exceeded, saving text-only receipts...');
-      try {
-        const textOnlyReceipts = receipts.map(r => ({ ...r, imageUrl: undefined }));
-        localStorage.setItem(k('receipts'), JSON.stringify(textOnlyReceipts));
-        // 사진이 새로 추가되는 순간(업로드 시)에만, 그리고 세션당 1회만 경고 표시
-        if (imagesIncreased && !quotaAlertShownRef.current) {
-          quotaAlertShownRef.current = true;
-          alert('⚠️ 첨부된 사진 용량이 너무 커서 브라우저 임시저장 용량을 초과했습니다.\n현재 화면에선 사진이 보이지만, 새로고침 시 사진은 날아갈 수 있습니다 (데이터는 보존됨).');
-        }
-      } catch (err) {
-        console.error('Failed to save data to localStorage', err);
-      }
+      console.warn('localStorage quota exceeded');
     }
 
     localStorage.setItem(k('docDate'), docDate);
@@ -310,10 +293,8 @@ function App() {
       const saved = localStorage.getItem(`${p}receipts`);
       const loaded = saved ? JSON.parse(saved) : [];
       setReceipts(loaded);
-      prevImageCountRef.current = loaded.filter((r: Receipt) => r.imageUrl).length;
     } catch {
       setReceipts([]);
-      prevImageCountRef.current = 0;
     }
     setDocDate(localStorage.getItem(`${p}docDate`) || new Date().toISOString().split('T')[0]);
     setDepartment(localStorage.getItem(`${p}department`) || WORKFLOW_DEFAULTS[workflowMode].department);
@@ -328,44 +309,11 @@ function App() {
       setSettlementMonth(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`);
     }
     setActiveTab('dashboard');
-    quotaAlertShownRef.current = false;
     // 상태 재로드 완료: 이제부터 autosave 활성화
     committedModeRef.current = workflowMode;
   }, [workflowMode]);
 
 
-
-  // Image resizing to prevent localStorage quota limit
-  const resizeImage = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 800;
-          let width = img.width;
-          let height = img.height;
-          if (width > MAX_WIDTH) {
-            height = Math.round((height * MAX_WIDTH) / width);
-            width = MAX_WIDTH;
-          }
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx?.drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL('image/jpeg', 0.6));
-        };
-        img.onerror = () => {
-          // If the file is not a valid browser-renderable image (e.g. PDF), fallback to original data url
-          resolve(e.target?.result as string);
-        };
-        img.src = e.target?.result as string;
-      };
-      reader.onerror = () => reject(new Error('File access failed'));
-      reader.readAsDataURL(file);
-    });
-  };
 
   // Convert File to Base64
   const fileToGenerativePart = async (file: File) => {
@@ -462,8 +410,6 @@ function App() {
 
           const parsedData = JSON.parse(cleanJson);
           
-          const base64Image = await resizeImage(file);
-          
           newReceipts.push({
             id: crypto.randomUUID(),
             date: parsedData.date || new Date().toISOString().split('T')[0],
@@ -478,7 +424,6 @@ function App() {
             installment: parsedData.installment || '일반승인',
             merchantNum: parsedData.merchantNum || '',
             items: Array.isArray(parsedData.items) ? parsedData.items : [],
-            imageUrl: base64Image
           });
           successCount++;
         } catch(err: unknown) {
