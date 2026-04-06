@@ -545,6 +545,20 @@ function App() {
     setReceipts(prev => [...prev, newReceipt]);
   };
 
+  // 수동 내역 추가 (공통)
+  const addManualReceipt = () => {
+    const today = new Date().toISOString().split('T')[0];
+    const newReceipt: Receipt = {
+      id: Date.now().toString() + Math.random().toString(36).slice(2, 6),
+      date: today,
+      store: '',
+      amount: 0,
+      category: '',
+      type: 'expense',
+    };
+    setReceipts(prev => [...prev, newReceipt]);
+  };
+
   const togglePaymentType = (id: string) => {
     setReceipts(prev => prev.map(r =>
       r.id === id ? { ...r, type: r.type === 'expense' ? 'income' : 'expense' } : r
@@ -657,8 +671,11 @@ function App() {
             분석된 영수증 내역 <span style={{ color: 'var(--text-muted)', fontSize: '14px' }}>({receipts.length}건)</span>
           </h3>
           <div className="flex-row" style={{ gap: '12px' }}>
+            <button className="btn-secondary" onClick={addManualReceipt} style={{ background: '#10b981', color: 'white', borderColor: '#10b981' }}>
+              <Upload size={16} /> 수동 내역 추가
+            </button>
             {workflowMode === 'corp' && (
-              <button className="btn-secondary" onClick={addCashReceipt} style={{ background: '#10b981', color: 'white', borderColor: '#10b981' }}>
+              <button className="btn-secondary" onClick={addCashReceipt} style={{ background: '#f59e0b', color: 'white', borderColor: '#f59e0b' }}>
                 <Wallet size={16} /> 현금 내역 추가
               </button>
             )}
