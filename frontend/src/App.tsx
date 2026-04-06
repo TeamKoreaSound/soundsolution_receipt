@@ -1193,9 +1193,9 @@ function App() {
             영 수 증 증 빙 철
           </h2>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, 158px)', gridAutoRows: '200px', gap: '16px', justifyContent: 'start' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: workflowMode === 'corp' ? 'repeat(3, 1fr)' : 'repeat(auto-fill, 158px)', gridAutoRows: workflowMode === 'corp' ? '250px' : '200px', gap: '16px', justifyContent: 'start' }}>
             {expenses.length > 0 ? expenses.map((r, idx) => (
-              <div key={'evidence-'+r.id+'-'+idx} style={{ padding: '0', breakInside: 'avoid', pageBreakInside: 'avoid', display: 'flex', flexDirection: 'column', width: '158px', height: '200px' }}>
+              <div key={'evidence-'+r.id+'-'+idx} style={{ padding: '0', breakInside: 'avoid', pageBreakInside: 'avoid', display: 'flex', flexDirection: 'column', width: '100%', height: workflowMode === 'corp' ? '250px' : '200px' }}>
 
                 {/* 텍스트 내용 (독립 박스) */}
                 <div style={{ border: '1px solid #000', padding: '12px', backgroundColor: '#fff', color: '#000', fontFamily: 'sans-serif', fontSize: '11px', lineHeight: '1.6', height: '100%', boxSizing: 'border-box', overflow: 'hidden' }}>
