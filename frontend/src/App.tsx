@@ -1159,6 +1159,14 @@ function App() {
 
     const expenses = receipts
       .filter(r => r.type === 'expense')
+      .filter(r => {
+        // 점심식대 모드: "연차" 포함 항목 제외
+        if (workflowMode === 'lunch') {
+          const text = `${r.store || ''} ${r.category || ''}`.toLowerCase();
+          if (text.includes('연차')) return false;
+        }
+        return true;
+      })
       .slice()
       .sort((a, b) => (a.date || '').localeCompare(b.date || '') || (a.time || '').localeCompare(b.time || ''))
       .map(r => {
