@@ -1135,7 +1135,7 @@ function App() {
   const renderEvidence = () => {
     // 상호별로 카드종류/카드번호/가맹점번호가 채워진 영수증을 우선 찾아 lookup 맵 구성
     const storeInfoMap = new Map<string, { cardName?: string; cardNumber?: string; merchantNum?: string }>();
-    receipts.filter(r => r.type === 'expense').forEach(r => {
+    receipts.forEach(r => {
       const key = (r.store || '').trim();
       if (!key) return;
       const existing = storeInfoMap.get(key) || {};
@@ -1146,9 +1146,8 @@ function App() {
     });
 
     const expenses = receipts
-      .filter(r => r.type === 'expense')
       .filter(r => {
-        // 영수증을 읽어들인 항목만 표시 (카드정보 또는 상품내역이 있는 경우)
+        // 영수증을 읽어들인 항목만 표시 (카드정보 또는 상품내역이 있는 경우) — type 무관
         const hasCardInfo = !!(r.cardName || r.cardNumber || r.approvalNum || r.merchantNum);
         const hasItems = !!(r.items && r.items.length > 0);
         if (!hasCardInfo && !hasItems) return false;
