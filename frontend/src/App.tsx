@@ -679,23 +679,20 @@ function App() {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th style={{ width: '36px', textAlign: 'center' }}>
-                    <input type="checkbox" checked={selectedIds.size === receipts.length && receipts.length > 0} onChange={toggleSelectAll} title="전체 선택" />
-                  </th>
                   <th>사용일자</th>
                   <th>사용처</th>
                   <th>사용내역</th>
                   <th style={{ textAlign: 'right' }}>법인카드</th>
                   <th style={{ textAlign: 'right' }}>현금</th>
+                  <th style={{ width: '36px', textAlign: 'center' }}>
+                    <input type="checkbox" checked={selectedIds.size === receipts.length && receipts.length > 0} onChange={toggleSelectAll} title="전체 선택" />
+                  </th>
                   <th style={{ textAlign: 'center', width: '50px' }}>관리</th>
                 </tr>
               </thead>
               <tbody>
                 {[...receipts].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime()).map(r => (
                   <tr key={r.id} style={{ background: selectedIds.has(r.id) ? 'rgba(239, 68, 68, 0.08)' : undefined }}>
-                    <td style={{ textAlign: 'center', width: '36px' }}>
-                      <input type="checkbox" checked={selectedIds.has(r.id)} onChange={() => toggleSelect(r.id)} />
-                    </td>
                     <td style={{ padding: '4px 8px', width: '15%' }}>
                       <input 
                         type="text" 
@@ -763,9 +760,12 @@ function App() {
                         </button>
                       )}
                     </td>
+                    <td style={{ textAlign: 'center', width: '36px' }}>
+                      <input type="checkbox" checked={selectedIds.has(r.id)} onChange={() => toggleSelect(r.id)} />
+                    </td>
                     <td style={{ textAlign: 'center' }}>
-                      <button 
-                        onClick={() => deleteReceipt(r.id)} 
+                      <button
+                        onClick={() => deleteReceipt(r.id)}
                         style={{ background: 'transparent', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '4px' }}
                         title="항목 삭제"
                       >
