@@ -105,6 +105,7 @@ function App() {
           <EvidenceView
             receipts={ws.receipts}
             workflowMode={ws.workflowMode}
+            docDate={ws.docDate}
             onPrint={print}
           />
         )}

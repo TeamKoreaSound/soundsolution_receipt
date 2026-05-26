@@ -1,14 +1,18 @@
-import { Fragment } from 'react';
-import { Image as ImageIcon } from 'lucide-react';
+import { useState, Fragment } from 'react';
+import { Image as ImageIcon, Download, Loader2 } from 'lucide-react';
 import type { Receipt, WorkflowMode } from '../types';
+import { exportEvidencePdf } from '../utils/exportPdf';
 
 interface EvidenceViewProps {
   receipts: Receipt[];
   workflowMode: WorkflowMode;
+  docDate: string;
   onPrint: () => void;
 }
 
-export default function EvidenceView({ receipts, workflowMode, onPrint }: EvidenceViewProps) {
+export default function EvidenceView({ receipts, workflowMode, docDate, onPrint }: EvidenceViewProps) {
+  const [isGenerating, setIsGenerating] = useState(false);
+
   // 상호별로 카드종류/카드번호/가맹점번호가 채워진 영수증을 우선 찾아 lookup 맵 구성
   const storeInfoMap = new Map<string, { cardName?: string; cardNumber?: string; merchantNum?: string }>();
   receipts.forEach(r => {
@@ -23,11 +27,9 @@ export default function EvidenceView({ receipts, workflowMode, onPrint }: Eviden
 
   const expenses = receipts
     .filter(r => {
-      // 영수증을 읽어들인 항목만 표시 (카드정보 또는 상품내역이 있는 경우) — type 무관
       const hasCardInfo = !!(r.cardName || r.cardNumber || r.approvalNum || r.merchantNum);
       const hasItems = !!(r.items && r.items.length > 0);
       if (!hasCardInfo && !hasItems) return false;
-      // 점심식대 모드: "연차" 포함 항목 제외
       if (workflowMode === 'lunch') {
         const text = `${r.store || ''} ${r.category || ''}`.toLowerCase();
         if (text.includes('연차')) return false;
@@ -46,9 +48,41 @@ export default function EvidenceView({ receipts, workflowMode, onPrint }: Eviden
       };
     });
 
+  const handleExportPdf = async () => {
+    setIsGenerating(true);
+    try {
+      const cols = workflowMode === 'corp' ? 3 : 5;
+      await exportEvidencePdf(expenses, docDate, cols);
+    } catch (err) {
+      console.error('PDF 생성 오류:', err);
+      alert('PDF 생성 중 오류가 발생했습니다.');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   return (
     <div className="preview-container flex-col" style={{ alignItems: 'center' }}>
-      <div className="flex-row" style={{ width: '850px', justifyContent: 'flex-end', marginBottom: '16px' }}>
+      <div className="flex-row" style={{ width: '850px', justifyContent: 'flex-end', marginBottom: '16px', gap: '12px' }}>
+        <button
+          className="btn-secondary"
+          onClick={handleExportPdf}
+          disabled={isGenerating || expenses.length === 0}
+          style={{
+            background: isGenerating ? '#6b7280' : '#2563eb',
+            color: 'white',
+            borderColor: isGenerating ? '#6b7280' : '#2563eb',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            cursor: isGenerating ? 'not-allowed' : 'pointer',
+          }}
+        >
+          {isGenerating
+            ? <><div style={{ animation: 'spin 1s linear infinite', display: 'flex' }}><Loader2 size={16} /></div> PDF 생성 중...</>
+            : <><Download size={16} /> PDF 저장</>
+          }
+        </button>
         <button className="btn-primary" onClick={onPrint}>
           <ImageIcon size={18} />
           현재 화면 PDF/A4 인쇄
@@ -63,8 +97,6 @@ export default function EvidenceView({ receipts, workflowMode, onPrint }: Eviden
         <div style={{ display: 'grid', gridTemplateColumns: workflowMode === 'corp' ? 'repeat(3, 1fr)' : 'repeat(auto-fill, 158px)', gridAutoRows: 'auto', gap: '16px', justifyContent: 'start', alignItems: 'start' }}>
           {expenses.length > 0 ? expenses.map((r, idx) => (
             <div key={'evidence-' + r.id + '-' + idx} style={{ padding: '0', breakInside: 'avoid', pageBreakInside: 'avoid', display: 'flex', flexDirection: 'column', width: '100%', minHeight: workflowMode === 'corp' ? '250px' : '200px' }}>
-
-              {/* 텍스트 내용 (독립 박스) */}
               <div style={{ border: '1px solid #000', padding: '12px', backgroundColor: '#fff', color: '#000', fontFamily: 'sans-serif', fontSize: '11px', lineHeight: '1.6', flex: 1, boxSizing: 'border-box' }}>
                 <div style={{ fontWeight: 'bold', fontSize: '14px', borderBottom: '1px solid #000', paddingBottom: '6px', marginBottom: '8px', textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {r.store}
