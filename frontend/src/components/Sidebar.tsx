@@ -130,7 +130,7 @@ export default function Sidebar({
         >
           <input
             type="file"
-            accept="image/*,.pdf"
+            accept="*/*"
             multiple
             onChange={onImageUpload}
             disabled={isExtracting}
