@@ -6,7 +6,7 @@ import {
   Save,
 } from 'lucide-react';
 import DocumentSettingsPanel from '../components/DocumentSettingsPanel';
-import type { Receipt, WorkflowMode } from '../types';
+import type { Receipt, WorkflowMode, EntertainmentRecord } from '../types';
 
 interface DashboardViewProps {
   receipts: Receipt[];
@@ -29,6 +29,8 @@ interface DashboardViewProps {
   onDeleteReceipt: (id: string) => void;
   onUpdateReceipt: (id: string, field: keyof Receipt, value: string | number) => void;
   onTogglePaymentType: (id: string) => void;
+  entertainmentRecords: EntertainmentRecord[];
+  onUpdateEntertainmentRecord: (id: string, field: keyof EntertainmentRecord, value: string | number) => void;
 }
 
 export default function DashboardView({
@@ -52,7 +54,11 @@ export default function DashboardView({
   onDeleteReceipt,
   onUpdateReceipt,
   onTogglePaymentType,
+  entertainmentRecords,
+  onUpdateEntertainmentRecord,
 }: DashboardViewProps) {
+  const linkedEntRecords = entertainmentRecords.filter(er => er.receiptId);
+
   return (
     <div className="flex-col" style={{ gap: '24px' }}>
 
@@ -118,7 +124,7 @@ export default function DashboardView({
               </thead>
               <tbody>
                 {[...receipts].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()).map(r => (
-                  <tr key={r.id} style={{ background: selectedIds.has(r.id) ? 'rgba(239, 68, 68, 0.08)' : undefined }}>
+                  <tr key={r.id} style={{ background: selectedIds.has(r.id) ? 'rgba(239, 68, 68, 0.08)' : r.amount >= 100000 && workflowMode === 'corp' ? 'rgba(234, 179, 8, 0.06)' : undefined }}>
                     <td style={{ padding: '4px 8px', width: '15%' }}>
                       <input
                         type="text"
@@ -209,6 +215,99 @@ export default function DashboardView({
           </div>
         )}
       </div>
+
+      {/* 접대사유서 입력 (corp 모드, 100,000원 이상 영수증이 있을 때) */}
+      {workflowMode === 'corp' && linkedEntRecords.length > 0 && (
+        <div className="glass-panel">
+          <div style={{ marginBottom: '16px' }}>
+            <h3 style={{ color: '#eab308', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              ⚠ 접대사유서 입력 필요
+            </h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginTop: '4px' }}>
+              100,000원 이상 영수증 {linkedEntRecords.length}건에 대해 접대사유서를 작성해주세요.
+              xlsx 다운로드 시 접대사유서 시트가 자동으로 추가됩니다.
+            </p>
+          </div>
+          <div style={{ overflowX: 'auto' }}>
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>접대날짜</th>
+                  <th>접대처</th>
+                  <th>인원</th>
+                  <th>사용처</th>
+                  <th style={{ textAlign: 'right' }}>금액</th>
+                  <th>사유</th>
+                </tr>
+              </thead>
+              <tbody>
+                {linkedEntRecords.map(er => (
+                  <tr key={er.id}>
+                    <td style={{ padding: '4px 8px', width: '13%' }}>
+                      <input
+                        type="text"
+                        value={er.date}
+                        onChange={e => onUpdateEntertainmentRecord(er.id, 'date', e.target.value)}
+                        className="editable-cell"
+                        style={{ textAlign: 'center' }}
+                      />
+                    </td>
+                    <td style={{ padding: '4px 8px', width: '18%' }}>
+                      <input
+                        type="text"
+                        value={er.counterpart}
+                        onChange={e => onUpdateEntertainmentRecord(er.id, 'counterpart', e.target.value)}
+                        className="editable-cell"
+                        placeholder="접대처 입력"
+                      />
+                    </td>
+                    <td style={{ padding: '4px 8px', width: '10%' }}>
+                      <input
+                        type="text"
+                        value={er.headcount}
+                        onChange={e => onUpdateEntertainmentRecord(er.id, 'headcount', e.target.value)}
+                        className="editable-cell"
+                        placeholder="인원 수"
+                        style={{ textAlign: 'center' }}
+                      />
+                    </td>
+                    <td style={{ padding: '4px 8px' }}>
+                      <input
+                        type="text"
+                        value={er.place}
+                        onChange={e => onUpdateEntertainmentRecord(er.id, 'place', e.target.value)}
+                        className="editable-cell"
+                        placeholder="사용처"
+                      />
+                    </td>
+                    <td style={{ padding: '4px 8px', width: '14%', textAlign: 'right' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+                        <span style={{ marginRight: '2px', color: 'var(--text-muted)' }}>₩</span>
+                        <input
+                          type="text"
+                          value={er.amount > 0 ? er.amount.toLocaleString() : ''}
+                          onChange={e => onUpdateEntertainmentRecord(er.id, 'amount', parseInt(e.target.value.replace(/,/g, '')) || 0)}
+                          className="editable-cell"
+                          style={{ textAlign: 'right', width: '100px', fontWeight: 600 }}
+                        />
+                      </div>
+                    </td>
+                    <td style={{ padding: '4px 8px' }}>
+                      <input
+                        type="text"
+                        value={er.reason}
+                        onChange={e => onUpdateEntertainmentRecord(er.id, 'reason', e.target.value)}
+                        className="editable-cell"
+                        placeholder="접대 사유 입력"
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

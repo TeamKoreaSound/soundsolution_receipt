@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { ChangeEvent } from 'react';
 import { WORKFLOW_LABELS, WORKFLOW_DEFAULTS } from '../types';
-import type { WorkflowMode, Receipt } from '../types';
+import type { WorkflowMode, Receipt, EntertainmentRecord } from '../types';
 import { runOcr } from '../utils/ocr';
 import { saveWorkspace, parseWorkspaceFile } from '../utils/workspace';
 
@@ -12,6 +12,7 @@ export function useReceiptWorkspace() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('dashboard');
 
   const [receipts, setReceipts] = useState<Receipt[]>([]);
+  const [entertainmentRecords, setEntertainmentRecords] = useState<EntertainmentRecord[]>([]);
   const [isImgHovered, setIsImgHovered] = useState(false);
   const [isExtracting, setIsExtracting] = useState(false);
 
@@ -32,6 +33,7 @@ export function useReceiptWorkspace() {
       return;
     }
     setReceipts([]);
+    setEntertainmentRecords([]);
     setDocDate(new Date().toISOString().split('T')[0]);
     setDepartment(WORKFLOW_DEFAULTS[workflowMode].department);
     setManager(WORKFLOW_DEFAULTS[workflowMode].manager);
@@ -41,6 +43,30 @@ export function useReceiptWorkspace() {
     setSettlementMonth(`${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`);
     setActiveTab('dashboard');
   }, [workflowMode]);
+
+  // corp 모드에서 100,000원 이상 영수증과 entertainmentRecords 자동 동기화
+  useEffect(() => {
+    if (workflowMode !== 'corp') return;
+    const highReceipts = receipts.filter(r => r.amount >= 100000);
+    setEntertainmentRecords(prev => {
+      const manual = prev.filter(er => !er.receiptId);
+      const linked = highReceipts.map(r => {
+        const existing = prev.find(er => er.receiptId === r.id);
+        if (existing) return existing;
+        return {
+          id: `ent-${r.id}`,
+          receiptId: r.id,
+          date: r.date,
+          counterpart: '',
+          headcount: '',
+          place: r.store,
+          amount: r.amount,
+          reason: '',
+        };
+      });
+      return [...linked, ...manual];
+    });
+  }, [receipts, workflowMode]);
 
   const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -66,7 +92,10 @@ export function useReceiptWorkspace() {
   };
 
   const clearData = () => {
-    if (confirm('모든 데이터를 삭제하시겠습니까?')) setReceipts([]);
+    if (confirm('모든 데이터를 삭제하시겠습니까?')) {
+      setReceipts([]);
+      setEntertainmentRecords([]);
+    }
   };
 
   const handlePrint = (activeTab: ActiveTab, workflowMode: WorkflowMode, docDate: string, settlementMonth: string) => {
@@ -76,7 +105,9 @@ export function useReceiptWorkspace() {
       const periodTag = workflowMode === 'lunch' ? (settlementMonth || docDate) : docDate;
       name = `${WORKFLOW_LABELS[workflowMode]}_증빙철_${periodTag}`;
     } else if (activeTab === 'preview') {
-      name = workflowMode === 'lunch' ? `점심식대지출증빙_${settlementMonth || docDate}` : `법인카드지출증빙_${docDate}`;
+      if (workflowMode === 'lunch') name = `점심식대지출증빙_${settlementMonth || docDate}`;
+      else if (workflowMode === 'entertainment') name = `접대사유서_${docDate}`;
+      else name = `법인카드지출증빙_${docDate}`;
     } else {
       name = `${WORKFLOW_LABELS[workflowMode]}_${docDate}`;
     }
@@ -132,6 +163,29 @@ export function useReceiptWorkspace() {
     setReceipts(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r));
   };
 
+  const updateEntertainmentRecord = (id: string, field: keyof EntertainmentRecord, value: string | number) => {
+    setEntertainmentRecords(prev => prev.map(er => er.id === id ? { ...er, [field]: value } : er));
+  };
+
+  const addEntertainmentRecord = () => {
+    const today = new Date().toISOString().split('T')[0];
+    setEntertainmentRecords(prev => [...prev, {
+      id: `ent-manual-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      date: today,
+      counterpart: '',
+      headcount: '',
+      place: '',
+      amount: 0,
+      reason: '',
+    }]);
+  };
+
+  const deleteEntertainmentRecord = (id: string) => {
+    if (confirm('이 항목을 삭제하시겠습니까?')) {
+      setEntertainmentRecords(prev => prev.filter(er => er.id !== id));
+    }
+  };
+
   const handleSaveWorkspace = () =>
     saveWorkspace({ receipts, docDate, department, manager, itemsPerPage, rowHeight, settlementMonth }, workflowMode);
 
@@ -161,6 +215,7 @@ export function useReceiptWorkspace() {
     workflowMode, setWorkflowMode,
     activeTab, setActiveTab,
     receipts,
+    entertainmentRecords,
     isImgHovered, setIsImgHovered,
     isExtracting,
     docDate, setDocDate,
@@ -183,6 +238,9 @@ export function useReceiptWorkspace() {
     addQuickReceipt,
     deleteReceipt,
     updateReceipt,
+    updateEntertainmentRecord,
+    addEntertainmentRecord,
+    deleteEntertainmentRecord,
     handleSaveWorkspace,
     loadWorkspace,
   };

@@ -1,9 +1,10 @@
-import { FileText } from 'lucide-react';
+import { FileText, Download } from 'lucide-react';
 import DocumentSettingsPanel from '../components/DocumentSettingsPanel';
 import QuickAddBar from '../components/QuickAddBar';
 import { numberToKoreanAmt } from '../utils/formatters';
 import { A4_MAX_ROWS } from '../utils/constants';
-import type { Receipt } from '../types';
+import { exportXlsx } from '../utils/exportXlsx';
+import type { Receipt, EntertainmentRecord } from '../types';
 
 interface PreviewViewProps {
   receipts: Receipt[];
@@ -16,6 +17,7 @@ interface PreviewViewProps {
   setQuickAdd: (v: { date: string; store: string; amount: string; note: string }) => void;
   onAddQuickReceipt: () => void;
   onPrint: () => void;
+  entertainmentRecords: EntertainmentRecord[];
 }
 
 export default function PreviewView({
@@ -28,15 +30,14 @@ export default function PreviewView({
   quickAdd, setQuickAdd,
   onAddQuickReceipt,
   onPrint,
+  entertainmentRecords,
 }: PreviewViewProps) {
-  // 법인카드(expense) + 현금(income) 모두 표시, 날짜순 정렬
   const expenses = receipts
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   const cardTotal = expenses.filter(r => r.type === 'expense').reduce((sum, r) => sum + r.amount, 0);
   const cashTotal = expenses.filter(r => r.type === 'income').reduce((sum, r) => sum + r.amount, 0);
   const totalAmount = cardTotal + cashTotal;
 
-  // A4 한 장에 헤더+푸터 제외 시 최대 ~13행. 데이터가 적으면 13행까지만 빈 행 채움.
   const MIN_ROWS = expenses.length <= A4_MAX_ROWS ? A4_MAX_ROWS : expenses.length;
   const pages = [expenses];
   const ITEMS_PER_PAGE = MIN_ROWS;
@@ -45,9 +46,24 @@ export default function PreviewView({
   const docMonth = docDate.split('-')[1] || '';
   const docDay = docDate.split('-')[2] || '';
 
+  const hasHigh = receipts.some(r => r.amount >= 100000);
+
+  const handleXlsxDownload = () => {
+    exportXlsx(receipts, entertainmentRecords, docDate, department, manager);
+  };
+
   return (
     <div className="preview-container flex-col" style={{ alignItems: 'center' }}>
-      <div className="flex-row" style={{ width: '850px', justifyContent: 'flex-end', marginBottom: '16px' }}>
+      <div className="flex-row" style={{ width: '850px', justifyContent: 'flex-end', marginBottom: '16px', gap: '12px' }}>
+        <button
+          className="btn-secondary"
+          onClick={handleXlsxDownload}
+          style={{ background: '#10b981', color: 'white', borderColor: '#10b981', display: 'flex', alignItems: 'center', gap: '6px' }}
+          title={hasHigh ? 'xlsx 다운로드 (접대사유서 시트 포함)' : 'xlsx 다운로드'}
+        >
+          <Download size={18} />
+          xlsx 다운로드{hasHigh ? ' (+접대사유서)' : ''}
+        </button>
         <button className="btn-primary" onClick={onPrint}>
           <FileText size={18} />
           현재 화면 PDF/A4 인쇄

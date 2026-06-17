@@ -4,6 +4,8 @@ import DashboardView from './views/DashboardView';
 import PreviewView from './views/PreviewView';
 import LunchPreviewView from './views/LunchPreviewView';
 import EvidenceView from './views/EvidenceView';
+import EntertainmentDashboardView from './views/EntertainmentDashboardView';
+import EntertainmentPreviewView from './views/EntertainmentPreviewView';
 
 function App() {
   const ws = useReceiptWorkspace();
@@ -26,14 +28,32 @@ function App() {
         <header className="header-area">
           <h1 className="header-title">
             {ws.activeTab === 'dashboard' && 'SOUND SOLUTION'}
-            {ws.activeTab === 'preview' && (ws.workflowMode === 'lunch' ? '식대 지출결의서 미리보기' : '지출결의서 미리보기')}
+            {ws.activeTab === 'preview' && ws.workflowMode === 'lunch' && '식대 지출결의서 미리보기'}
+            {ws.activeTab === 'preview' && ws.workflowMode === 'corp' && '지출결의서 미리보기'}
+            {ws.activeTab === 'preview' && ws.workflowMode === 'entertainment' && '접대사유서 미리보기'}
             {ws.activeTab === 'evidence' && '영수증 증빙철 미리보기'}
           </h1>
           <div className="flex-row">
           </div>
         </header>
 
-        {ws.activeTab === 'dashboard' && (
+        {/* 대시보드 - entertainment 모드 */}
+        {ws.activeTab === 'dashboard' && ws.workflowMode === 'entertainment' && (
+          <EntertainmentDashboardView
+            entertainmentRecords={ws.entertainmentRecords}
+            docDate={ws.docDate} setDocDate={ws.setDocDate}
+            department={ws.department} setDepartment={ws.setDepartment}
+            manager={ws.manager} setManager={ws.setManager}
+            itemsPerPage={ws.itemsPerPage} setItemsPerPage={ws.setItemsPerPage}
+            rowHeight={ws.rowHeight} setRowHeight={ws.setRowHeight}
+            onAddRecord={ws.addEntertainmentRecord}
+            onUpdateRecord={ws.updateEntertainmentRecord}
+            onDeleteRecord={ws.deleteEntertainmentRecord}
+          />
+        )}
+
+        {/* 대시보드 - corp/lunch 모드 */}
+        {ws.activeTab === 'dashboard' && ws.workflowMode !== 'entertainment' && (
           <DashboardView
             receipts={ws.receipts}
             workflowMode={ws.workflowMode}
@@ -55,9 +75,13 @@ function App() {
             onDeleteReceipt={ws.deleteReceipt}
             onUpdateReceipt={ws.updateReceipt}
             onTogglePaymentType={ws.togglePaymentType}
+            entertainmentRecords={ws.entertainmentRecords}
+            onUpdateEntertainmentRecord={ws.updateEntertainmentRecord}
           />
         )}
-        {ws.activeTab === 'preview' && ws.workflowMode !== 'lunch' && (
+
+        {/* 미리보기 - corp 모드 */}
+        {ws.activeTab === 'preview' && ws.workflowMode === 'corp' && (
           <PreviewView
             receipts={ws.receipts}
             docDate={ws.docDate} setDocDate={ws.setDocDate}
@@ -68,8 +92,11 @@ function App() {
             quickAdd={ws.quickAdd} setQuickAdd={ws.setQuickAdd}
             onAddQuickReceipt={ws.addQuickReceipt}
             onPrint={print}
+            entertainmentRecords={ws.entertainmentRecords}
           />
         )}
+
+        {/* 미리보기 - lunch 모드 */}
         {ws.activeTab === 'preview' && ws.workflowMode === 'lunch' && (
           <LunchPreviewView
             receipts={ws.receipts}
@@ -84,7 +111,21 @@ function App() {
             onPrint={print}
           />
         )}
-        {ws.activeTab === 'evidence' && (
+
+        {/* 미리보기 - entertainment 모드 */}
+        {ws.activeTab === 'preview' && ws.workflowMode === 'entertainment' && (
+          <EntertainmentPreviewView
+            entertainmentRecords={ws.entertainmentRecords}
+            docDate={ws.docDate} setDocDate={ws.setDocDate}
+            department={ws.department} setDepartment={ws.setDepartment}
+            manager={ws.manager} setManager={ws.setManager}
+            itemsPerPage={ws.itemsPerPage} setItemsPerPage={ws.setItemsPerPage}
+            rowHeight={ws.rowHeight} setRowHeight={ws.setRowHeight}
+            onPrint={print}
+          />
+        )}
+
+        {ws.activeTab === 'evidence' && ws.workflowMode !== 'entertainment' && (
           <EvidenceView
             receipts={ws.receipts}
             workflowMode={ws.workflowMode}

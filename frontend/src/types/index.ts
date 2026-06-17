@@ -1,14 +1,27 @@
-export type WorkflowMode = 'corp' | 'lunch';
+export type WorkflowMode = 'corp' | 'lunch' | 'entertainment';
 
 export const WORKFLOW_LABELS: Record<WorkflowMode, string> = {
-  corp: '법인카드 지출증빙',
   lunch: '점심식대 지출증빙',
+  corp: '법인카드 지출증빙',
+  entertainment: '접대사유 지출증빙',
 };
 
 export const WORKFLOW_DEFAULTS: Record<WorkflowMode, { department: string; manager: string }> = {
   corp: { department: '', manager: '' },
   lunch: { department: '', manager: '' },
+  entertainment: { department: '', manager: '' },
 };
+
+export interface EntertainmentRecord {
+  id: string;
+  receiptId?: string;
+  date: string;
+  counterpart: string;
+  headcount: string;
+  place: string;
+  amount: number;
+  reason: string;
+}
 
 export interface Receipt {
   id: string;
@@ -40,7 +53,6 @@ export interface DocumentSettingsPanelProps {
   setRowHeight: (v: number) => void;
   width?: string;
   className?: string;
-  // 점심식대 모드: 1페이지당 개수 필드를 정산월(YYYY-MM)로 교체
   showSettlementMonth?: boolean;
   settlementMonth?: string;
   setSettlementMonth?: (v: string) => void;
