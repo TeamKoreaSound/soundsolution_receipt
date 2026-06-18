@@ -269,76 +269,80 @@ export default function PreviewView({
                 </tbody>
               </table>
 
-              {/* 접대 내용 테이블 */}
+              {/* 접대 내용 테이블 - 6행 2열 구조 */}
               <table className="excel-table" style={{ tableLayout: 'fixed', width: '100%', marginTop: '24px' }}>
                 <colgroup>
-                  <col style={{ width: '13%' }} />
-                  <col style={{ width: '17%' }} />
-                  <col style={{ width: '9%' }} />
-                  <col style={{ width: '17%' }} />
-                  <col style={{ width: '13%' }} />
-                  <col style={{ width: '31%' }} />
+                  <col style={{ width: '25%' }} />
+                  <col style={{ width: '75%' }} />
                 </colgroup>
                 <tbody>
-                  <tr className="border-thick-bottom" style={{ background: '#d9d9d9', fontWeight: 'bold', height: '36px' }}>
-                    <td>접 대 날 짜</td>
-                    <td>접 대 처</td>
-                    <td>인 원</td>
-                    <td>사 용 처</td>
-                    <td>금 액</td>
-                    <td>사 유</td>
-                  </tr>
-                  <tr style={{ height: '48px' }}>
-                    <td style={{ padding: '4px' }}>
-                      <input
-                        type="text"
+                  <tr>
+                    <td style={{ background: '#d9d9d9', fontWeight: 'bold', textAlign: 'center', padding: '8px 4px', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>접 대 날 짜</td>
+                    <td style={{ padding: '4px', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
+                      <textarea
                         value={er.date}
                         onChange={e => onUpdateEntertainmentRecord(er.id, 'date', e.target.value)}
-                        style={entInput({ textAlign: 'center' })}
+                        rows={1}
+                        style={entInput({ textAlign: 'center', resize: 'none', wordBreak: 'break-word', whiteSpace: 'pre-wrap', overflowWrap: 'break-word' })}
                       />
                     </td>
-                    <td style={{ padding: '4px' }}>
-                      <input
-                        type="text"
+                  </tr>
+                  <tr>
+                    <td style={{ background: '#d9d9d9', fontWeight: 'bold', textAlign: 'center', padding: '8px 4px', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>접 대 처</td>
+                    <td style={{ padding: '4px', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
+                      <textarea
                         value={er.counterpart}
                         onChange={e => onUpdateEntertainmentRecord(er.id, 'counterpart', e.target.value)}
                         placeholder="접대처"
-                        style={entInput()}
+                        rows={1}
+                        style={entInput({ resize: 'none', wordBreak: 'break-word', whiteSpace: 'pre-wrap', overflowWrap: 'break-word' })}
                       />
                     </td>
-                    <td style={{ padding: '4px' }}>
-                      <input
-                        type="text"
+                  </tr>
+                  <tr>
+                    <td style={{ background: '#d9d9d9', fontWeight: 'bold', textAlign: 'center', padding: '8px 4px', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>인 원</td>
+                    <td style={{ padding: '4px', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
+                      <textarea
                         value={er.headcount}
                         onChange={e => onUpdateEntertainmentRecord(er.id, 'headcount', e.target.value)}
                         placeholder="0명"
-                        style={entInput({ textAlign: 'center' })}
+                        rows={1}
+                        style={entInput({ textAlign: 'center', resize: 'none', wordBreak: 'break-word', whiteSpace: 'pre-wrap', overflowWrap: 'break-word' })}
                       />
                     </td>
-                    <td style={{ padding: '4px' }}>
-                      <input
-                        type="text"
+                  </tr>
+                  <tr>
+                    <td style={{ background: '#d9d9d9', fontWeight: 'bold', textAlign: 'center', padding: '8px 4px', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>사 용 처</td>
+                    <td style={{ padding: '4px', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
+                      <textarea
                         value={er.place}
                         onChange={e => onUpdateEntertainmentRecord(er.id, 'place', e.target.value)}
                         placeholder="사용처"
-                        style={entInput()}
+                        rows={1}
+                        style={entInput({ resize: 'none', wordBreak: 'break-word', whiteSpace: 'pre-wrap', overflowWrap: 'break-word' })}
                       />
                     </td>
-                    <td style={{ padding: '4px' }}>
-                      <input
-                        type="text"
+                  </tr>
+                  <tr>
+                    <td style={{ background: '#d9d9d9', fontWeight: 'bold', textAlign: 'center', padding: '8px 4px', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>금 액</td>
+                    <td style={{ padding: '4px', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
+                      <textarea
                         value={er.amount > 0 ? er.amount.toLocaleString() : ''}
                         onChange={e => onUpdateEntertainmentRecord(er.id, 'amount', parseInt(e.target.value.replace(/,/g, '')) || 0)}
-                        style={entInput({ textAlign: 'right', fontWeight: 600 })}
+                        rows={1}
+                        style={entInput({ textAlign: 'right', fontWeight: 600, resize: 'none', wordBreak: 'break-word', whiteSpace: 'pre-wrap', overflowWrap: 'break-word' })}
                       />
                     </td>
-                    <td style={{ padding: '4px' }}>
-                      <input
-                        type="text"
+                  </tr>
+                  <tr>
+                    <td style={{ background: '#d9d9d9', fontWeight: 'bold', textAlign: 'center', padding: '8px 4px', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>사 유</td>
+                    <td style={{ padding: '4px', wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>
+                      <textarea
                         value={er.reason}
                         onChange={e => onUpdateEntertainmentRecord(er.id, 'reason', e.target.value)}
                         placeholder="접대 사유"
-                        style={entInput()}
+                        rows={2}
+                        style={entInput({ resize: 'none', wordBreak: 'break-word', whiteSpace: 'pre-wrap', overflowWrap: 'break-word' })}
                       />
                     </td>
                   </tr>
