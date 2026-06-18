@@ -63,6 +63,26 @@ export const OCR_PROMPT = `
 
 const sleep = (ms: number) => new Promise<void>(resolve => setTimeout(resolve, ms));
 
+// 503 오류 시 delayMs 간격으로 최대 maxRetries번 재시도
+const callWithRetry = async <T>(fn: () => Promise<T>, maxRetries = 3, delayMs = 3000): Promise<T> => {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (err: unknown) {
+      const is503 =
+        (err as { status?: number }).status === 503 ||
+        (err instanceof Error && err.message.includes('503'));
+      if (is503 && attempt < maxRetries) {
+        console.warn(`Gemini 503 오류 — ${attempt + 1}/${maxRetries}회 시도, ${delayMs / 1000}초 후 재시도`);
+        await sleep(delayMs);
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw new Error('unreachable');
+};
+
 export const runOcr = async (
   files: FileList,
 ): Promise<{ receipts: Receipt[]; successCount: number; failCount: number; lastError: unknown }> => {
@@ -103,7 +123,7 @@ export const runOcr = async (
       const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
       const imagePart = await fileToGenerativePart(file);
-      const result = await model.generateContent([OCR_PROMPT, imagePart]);
+      const result = await callWithRetry(() => model.generateContent([OCR_PROMPT, imagePart]));
       const responseText = result.response.text().trim();
 
       let cleanJson = responseText;
